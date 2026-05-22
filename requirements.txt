@@ -7,9 +7,12 @@ sqlalchemy
 alembic
 pymysql[rsa]
 cryptography
-streamlit
+fastapi
+uvicorn[standard]
+python-multipart
 pandas
 openpyxl
 pydantic
 python-dotenv
 pytest
+httpx

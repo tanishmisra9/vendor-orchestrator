@@ -20,4 +20,4 @@ if [ $attempt -gt $MAX_RETRIES ]; then
     echo "WARNING: Could not apply migrations after $MAX_RETRIES attempts. Starting app anyway."
 fi
 
-exec streamlit run ui/app.py --server.port=${PORT:-8501} --server.address=0.0.0.0
+exec uvicorn webapp.main:app --host 0.0.0.0 --port ${PORT:-8000}

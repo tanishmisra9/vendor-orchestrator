@@ -1,6 +1,6 @@
 # Agentic Vendor Master Assistant
 
-A modular Agentic AI solution that manages, cleans, deduplicates, and enriches vendor data across an enterprise. Built with LangGraph orchestration, OpenAI GPT-4, and a Streamlit analyst UI.
+A modular AI solution for managing, cleaning, deduplicating, and enriching vendor data across an enterprise. The application now ships as a custom `FastAPI + React + Vite` web app with an Apple-inspired dark analyst experience, while preserving the existing LangGraph orchestration and Python domain logic.
 
 **Live demo:** [vendororchestrator-production.up.railway.app](https://vendororchestrator-production.up.railway.app)
 
@@ -15,15 +15,15 @@ The system distributes work across four autonomous agents coordinated via a shar
 
 ### Key features
 
-- **Batch pipeline** with live progress bar and typewriter status animation
-- **Column validation** on upload with visual green/red pill indicators for matched, missing, and extra columns
+- **Premium analyst shell** with a glassmorphism dashboard, route-based navigation, live metrics, and audit visibility
+- **Batch pipeline** with upload validation, staged live progress, result metrics, and quality reporting
 - **Blocking-based deduplication** for scalable matching (tested at 100k records) — exact tax ID matching, multi-strategy blocking (sorted tokens, first token, tax ID), and a name-similarity override for near-identical vendor names
 - **LLM fail-fast** — gracefully degrades if OpenAI quota is exhausted (2 consecutive failures skips remaining LLM calls)
 - **LLM prompt injection protection** — vendor field sanitization (truncation, control char stripping) and system-message guardrails
-- **Search vendor master** with aggregate metrics, default active-vendor preview, LIKE-injection-safe search, and expandable duplicate cluster views
+- **Add vendor review flow** with duplicate analysis, override logging, and server-side validation
+- **Search vendor master** with aggregate metrics, filter controls, and duplicate-cluster inspection
 - **Audit log** tracking all agent actions and analyst override decisions, with configurable strict mode
-- **Input validation** on the Add Vendor form (EIN format tax ID, 5-digit ZIP, 2-letter state code)
-- **Password authentication** gate (optional, via environment variable)
+- **Password authentication** via API session cookie (optional, via environment variable)
 - **Alembic database migrations** for safe schema evolution
 - **Upload size limit** (200 MB default) to prevent OOM on large files
 - **Sanitized error messages** — API keys, credentials, and connection strings are stripped from UI error displays
@@ -33,10 +33,10 @@ The system distributes work across four autonomous agents coordinated via a shar
 
 The app is deployed on [Railway](https://railway.app) with two services:
 
-- **VendorOrchestrator** — Dockerized Streamlit app built from this repo
+- **VendorOrchestrator** — Dockerized FastAPI app serving the compiled React frontend and API from one container
 - **MySQL** — Railway-managed MySQL 8.0 instance
 
-Railway auto-deploys on every push to `master`. The entrypoint script waits for the database to be ready, runs Alembic migrations, then starts Streamlit on the Railway-assigned `PORT`.
+Railway auto-deploys on every push to `master`. The entrypoint script waits for the database to be ready, runs Alembic migrations, then starts `uvicorn` on the Railway-assigned `PORT`.
 
 ### Deploy your own
 
@@ -64,9 +64,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-The Streamlit UI will be available at `http://localhost:8501`.
+The web app will be available at `http://localhost:8000`.
 
-On startup, the entrypoint script retries Alembic migrations until the database is ready, then starts the app.
+On startup, the entrypoint script retries Alembic migrations until the database is ready, then starts the API and serves the compiled frontend.
 
 ### Run locally (development)
 
@@ -74,6 +74,7 @@ On startup, the entrypoint script retries Alembic migrations until the database 
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+npm --prefix frontend install
 
 cp .env.example .env
 # Edit .env — ensure MySQL is running locally with matching credentials
@@ -81,7 +82,18 @@ cp .env.example .env
 # Apply database migrations
 alembic upgrade head
 
-streamlit run ui/app.py
+# Terminal 1: API
+uvicorn webapp.main:app --reload --port 8000
+
+# Terminal 2: frontend (optional for hot reload)
+npm --prefix frontend run dev
+```
+
+For pure production-style local testing, build the frontend and let FastAPI serve it:
+
+```bash
+npm --prefix frontend run build
+uvicorn webapp.main:app --port 8000
 ```
 
 ## Database migrations
@@ -108,8 +120,9 @@ agents/          Agent modules (DataQuality, Deduplication, Loader, VendorCheck)
 alembic/         Database migration scripts (Alembic)
 context/         MCP shared context layer (in-memory state per pipeline run)
 db/              SQLAlchemy models and connection factory with retry logic
+frontend/        React + Vite + TypeScript analyst frontend
 orchestrator/    LangGraph StateGraph workflow with stepwise execution
-ui/              Streamlit analyst interface with custom CSS theming
+webapp/          FastAPI application, auth, batch jobs, and API schemas
 utils/           Fuzzy matching, audit logging, error sanitization, LIKE escaping
 tests/           Unit tests for agents, matching, loader, and hardening
 data/            Sample vendor CSVs (100k well-formed, 50k malformed for testing)
@@ -118,10 +131,11 @@ entrypoint.sh    Startup script with database readiness retry loop
 
 ## Usage
 
-1. **Batch pipeline** — Upload a CSV/XLSX vendor file (max 200 MB). Column validation runs immediately, showing which expected columns are present or missing. The pipeline then runs DataQuality → Deduplication → Loader with a live progress bar.
-2. **Add vendor** — Enter a single vendor record with validated fields (EIN tax ID, 5-digit ZIP, 2-letter state). The VendorCheckAgent checks for duplicates before insertion, with an option to override and force-add.
-3. **Search vendors** — Browse the vendor master with aggregate metrics (active, total, duplicates). Expand any vendor to see its duplicate cluster. Toggle to include duplicate records in results.
-4. **Audit log** — Review all agent actions and analyst override decisions with filtering by agent.
+1. **Overview** — Land on a premium analyst dashboard with high-level metrics, recent activity, and shortcuts into each workflow.
+2. **Batch pipeline** — Upload a CSV/XLSX vendor file (max 200 MB), validate its columns, and follow DataQuality → Deduplication → Loader with live status updates.
+3. **Add vendor** — Enter a single vendor record, run duplicate analysis, and explicitly choose whether to add or override.
+4. **Vendor master** — Search and filter the vendor directory, view metrics, and inspect duplicate clusters.
+5. **Audit trail** — Review all agent actions and analyst override decisions.
 
 ## Authentication
 
@@ -138,9 +152,10 @@ Two sample files are included in `data/` for testing:
 
 ```bash
 pytest tests/ -v
+npm --prefix frontend test
 ```
 
-51 tests covering agents, matching logic, loader behavior, error sanitization, LIKE escaping, deterministic canonical selection, and prompt injection sanitization.
+Python tests cover agents, matching logic, loader behavior, API routes, error sanitization, LIKE escaping, deterministic canonical selection, and prompt injection sanitization. Frontend tests cover authentication, batch upload flow, add-vendor duplicate feedback, vendor search cluster inspection, and audit mode switching.
 
 ## Environment variables
 
@@ -159,9 +174,11 @@ pytest tests/ -v
 ## Tech stack
 
 - **Python 3.11** — runtime
+- **FastAPI** — API shell and production web server surface
+- **React + Vite + TypeScript** — analyst frontend
 - **LangGraph** — agent orchestration
 - **OpenAI GPT-4** — LLM for ambiguous deduplication and vendor checks
-- **Streamlit** — analyst UI
+- **Framer Motion** — motion system for page transitions and progress states
 - **MySQL 8.0** — vendor master database
 - **SQLAlchemy** — ORM
 - **Alembic** — database migrations
