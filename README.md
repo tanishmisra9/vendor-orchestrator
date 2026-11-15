@@ -1,4 +1,8 @@
-# Agentic Vendor Master Assistant
+# Vendor Orchestrator
+
+**Agentic Vendor Master Assistant**
+
+![License: MIT](https://img.shields.io/badge/license-MIT-blue) ![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) [![CI](https://github.com/tanishmisra9/vendor-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/tanishmisra9/vendor-orchestrator/actions/workflows/ci.yml) [![Live](https://img.shields.io/badge/live-railway.app-2ea44f)](https://vendororchestrator-production.up.railway.app)
 
 A modular AI solution for managing, cleaning, deduplicating, and enriching vendor data across an enterprise. The application now ships as a custom `FastAPI + React + Vite` web app with an Apple-inspired dark analyst experience, while preserving the existing LangGraph orchestration and Python domain logic.
 
@@ -36,7 +40,7 @@ The app is deployed on [Railway](https://railway.app) with two services:
 - **VendorOrchestrator** — Dockerized FastAPI app serving the compiled React frontend and API from one container
 - **MySQL** — Railway-managed MySQL 8.0 instance
 
-Railway auto-deploys on every push to `master`. The entrypoint script waits for the database to be ready, runs Alembic migrations, then starts `uvicorn` on the Railway-assigned `PORT`.
+Railway auto-deploys on every push to `main`. The entrypoint script waits for the database to be ready, runs Alembic migrations, then starts `uvicorn` on the Railway-assigned `PORT`.
 
 ### Deploy your own
 
