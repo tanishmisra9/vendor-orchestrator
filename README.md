@@ -2,11 +2,11 @@
 
 **Agentic Vendor Master Assistant**
 
-![License: MIT](https://img.shields.io/badge/license-MIT-blue) ![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) [![CI](https://github.com/tanishmisra9/vendor-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/tanishmisra9/vendor-orchestrator/actions/workflows/ci.yml) [![Live](https://img.shields.io/badge/live-railway.app-2ea44f)](https://vendororchestrator-production.up.railway.app)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue) ![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) [![CI](https://github.com/tanishmisra9/vendor-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/tanishmisra9/vendor-orchestrator/actions/workflows/ci.yml)
 
 A modular AI solution for managing, cleaning, deduplicating, and enriching vendor data across an enterprise. The application now ships as a custom `FastAPI + React + Vite` web app with an Apple-inspired dark analyst experience, while preserving the existing LangGraph orchestration and Python domain logic.
 
-**Live demo:** [vendororchestrator-production.up.railway.app](https://vendororchestrator-production.up.railway.app)
+> **Note:** This app was previously deployed on Railway and the live demo was taken down in November 2026. Run it locally using the instructions below.
 
 ## Architecture
 
@@ -35,14 +35,14 @@ The system distributes work across four autonomous agents coordinated via a shar
 
 ## Deployment
 
-The app is deployed on [Railway](https://railway.app) with two services:
+The app was previously deployed on [Railway](https://railway.app) (now taken down) with two services:
 
 - **VendorOrchestrator** — Dockerized FastAPI app serving the compiled React frontend and API from one container
 - **MySQL** — Railway-managed MySQL 8.0 instance
 
-Railway auto-deploys on every push to `main`. The entrypoint script waits for the database to be ready, runs Alembic migrations, then starts `uvicorn` on the Railway-assigned `PORT`.
+Railway auto-deployed on every push. The entrypoint script waits for the database to be ready, runs Alembic migrations, then starts `uvicorn` on the Railway-assigned `PORT`.
 
-### Deploy your own
+### Deploy your own (the steps used for the original deployment)
 
 1. Push this repo to GitHub
 2. Create a new project on [Railway](https://railway.app)
@@ -188,4 +188,4 @@ Python tests cover agents, matching logic, loader behavior, API routes, error sa
 - **Alembic** — database migrations
 - **RapidFuzz** — fuzzy string matching
 - **Docker** — containerization
-- **Railway** — cloud deployment
+- **Railway** — cloud deployment (previously used; deployment taken down)
